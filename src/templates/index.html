@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Smart Resume Matcher</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: #bdd1ed;
+        margin: 0;
+        padding: 40px;
+    }
+
+    .container {
+        max-width: 600px;
+        margin: auto;
+        background: rgb(208, 206, 245);
+        padding: 25px;
+        border-radius: 10px;
+        box-shadow: 0 0 15px rgba(0,0,0,0.1);
+    }
+
+    h2 {
+        text-align: center;
+        color: #161616;
+        margin-bottom: 20px;
+    }
+
+    label {
+        font-weight: bold;
+        margin-top: 15px;
+        display: block;
+    }
+
+    input, textarea, button {
+        width: 100%;
+        padding: 10px;
+        margin-top: 5px;
+        border-radius: 6px;
+        border: 1px solid #dbd3d3;
+        font-size: 15px;
+    }
+
+    button {
+        background: #799aed;
+        color: rgb(240, 237, 237);
+        cursor: pointer;
+        margin-top: 20px;
+        border: none;
+    }
+
+    button:hover {
+        background: #879bd1;
+    }
+
+    .score-box {
+        margin-top: 25px;
+        padding: 20px;
+        background: #98b0f8;
+        border-left: 6px solid #a5b9ec;
+        border-radius: 8px;
+        display: none;
+        font-size: 20px;
+        text-align: center;
+        font-weight: bold;
+        opacity: 0;
+        transition: opacity 0.4s ease-in-out;
+    }
+
+    .error-box {
+        background: #ffdedf;
+        border-left: 6px solid #ff4444;
+        color: #b20000;
+    }
+
+</style>
+</head>
+
+<body>
+<div class="container">
+    <h2>Resume Matcher</h2>
+
+    <form id="scoreForm">
+
+        <label>Upload Resume (PDF/TXT/DOCX):</label>
+        <input type="file" name="resume_file">
+
+        <label>Or Paste Resume Text:</label>
+        <textarea name="resume_text" rows="5"></textarea>
+
+        <label>Job Description:</label>
+        <textarea name="job_description" rows="5"></textarea>
+
+        <button type="submit">Calculate Fit Score</button>
+    </form>
+
+    <div id="scoreBox" class="score-box"></div>
+</div>
+
+<script>
+document.getElementById("scoreForm").onsubmit = async (e) => {
+    e.preventDefault();
+
+    let formData = new FormData(document.getElementById("scoreForm"));
+
+    let res = await fetch("/score", {
+        method: "POST",
+        body: formData
+    });
+
+    let data = await res.json();
+
+    let box = document.getElementById("scoreBox");
+
+    // Reset classes
+    box.classList.remove("error-box");
+    box.style.display = "block";
+
+    if (data.fit_score !== undefined) {
+        box.innerHTML = "Fit Score: " + data.fit_score.toFixed(2) + " / 100";
+    } 
+    else {
+        box.classList.add("error-box");
+        box.innerHTML = "Error: " + data.error;
+    }
+
+    // Fade-in
+    setTimeout(() => {
+        box.style.opacity = 1;
+    }, 50);
+};
+</script>
+</body>
+</html>
